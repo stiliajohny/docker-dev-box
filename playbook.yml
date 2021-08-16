@@ -1,0 +1,27 @@
+---
+- hosts: localhost
+  tasks:
+    - docker_container:
+        name: temp-docker-dev-box
+        image: ubuntu:latest
+        command: ["sleep", "1d"]
+
+- name: Provision docker
+  hosts: example-playdocker-dev-box
+  roles:
+    - name: "docker-role"
+
+- name: Localhost tasks
+  hosts: 127.0.0.1
+  tasks:
+    - name: Commit the docker container
+      shell: "docker commit temp-docker-dev-box"
+      register: docker_commit_sha
+
+    - name: print
+      debug:
+        msg: "{{ docker_commit_sha.stdout.split(':')[1] }}"
+
+    - name: Tag the docker container
+      shell: "docker tag {{ docker_commit_sha.stdout.split(':')[1] }} ubuntu-dev-box"
+

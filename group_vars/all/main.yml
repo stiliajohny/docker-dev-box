@@ -1,0 +1,5 @@
+---
+temp-docker-image-name: "temp-docker-dev-box"
+temp-docker-image-source: "ubuntu:latest"
+
+gen-docker-image-name: "ubuntu-dev-box"

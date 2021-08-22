@@ -1,6 +1,0 @@
----
-- hosts: localhost
-  tasks:
-    - docker_container:
-        name: docker-dev-box
-        state: absent

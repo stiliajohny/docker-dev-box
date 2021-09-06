@@ -16,7 +16,5 @@ else
 	${tigervnc_path}/vncserver -rfbport 5900 -SecurityTypes None
 fi
 
-xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image  -s /root/.wallpaper.jpg
-
 # Start noVNC
 /noVNC-${noVNC_version}/utils/launch.sh

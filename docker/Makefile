@@ -59,30 +59,50 @@ check-trivy: ## Check: Confirm Trivy dependencies
 		echo "$(BOLD)$(GREEN)Found Poetry on $(TRIVY)$(RESET)"; \
 	fi
 
-build-docker-ubuntu: check-all ## Standard: Docker build Ubuntu images
+build-docker-ubuntu: check-all stop-docker-ubuntu ## Standard: Docker build Ubuntu images
 	@echo "$(YELLOW)TAG_ID = $(TAG_ID)$(RESET)"
 	@echo "$(YELLOW)VERSION = $(VERSION)$(RESET)"
 	@$(DOCKER) build -f $(DOCKERFILE).ubuntu --build-arg VERSION=${VERSION} -t $(IMAGE_NAME)-ubuntu:xfce-18.04-$(TAG_ID) .
 
-build-docker-archlinux: check-all ## Standard: Docker build Archlinux images
+build-docker-archlinux: check-all stop-docker-archlinux ## Standard: Docker build Archlinux images
 	@echo "$(YELLOW)TAG_ID = $(TAG_ID)$(RESET)"
 	@echo "$(YELLOW)VERSION = $(VERSION)$(RESET)"
 	@$(DOCKER) build --no-cache -f $(DOCKERFILE).archlinux -t $(IMAGE_NAME)-archlinux:$(TAG_ID) .
 
 run-docker-ubuntu: check-all  ## Standard: Run the docker image with given arguments
 	@echo "$(BOLD)$(GREEN)Starting container...$(RESET)"
-	@docker run -d -p 5900:5900 -p $(VNC_PORT):6080 --name="$(IMAGE_NAME)-ubuntu" -h "docker-dev-box"  -e VNC_PASSWD=password $(IMAGE_NAME)-ubuntu:xfce-18.04-$(TAG_ID)
+	@docker run -d \
+	-p 5900:5900 -p $(VNC_PORT):6080 \
+	--name="$(IMAGE_NAME)-ubuntu" \
+	-v ~/Desktop:/home/acid_burn/Desktop/ \
+	-h "docker-dev-box" \
+	-e VNC_PASSWD="" \
+	$(IMAGE_NAME)-ubuntu:xfce-18.04-$(TAG_ID)
 
 run-docker-archlinux: check-all  ## Standard: Run the docker image with given arguments
-	@docker run -d -p 5900:5900 -p $(VNC_PORT):6080 --name="$(IMAGE_NAME)-archlinux" -h "docker-dev-box"  -e VNC_PASSWD=password $(IMAGE_NAME)-archlinux:$(TAG_ID)
+		@echo "$(BOLD)$(GREEN)Starting container...$(RESET)"
+	@docker run -d \
+	-p 5900:5900 -p $(VNC_PORT):6080 \
+	--name="$(IMAGE_NAME)-archlinux" \
+	-h "docker-dev-box"  \
+	-e VNC_PASSWD="" \
+	$(IMAGE_NAME)-archlinux:$(TAG_ID)
 
-stop-docker-ubuntu: ## Stop the the running containers
+stop-docker-ubuntu: check-all ## Stop the the running containers
 	@echo "$(BOLD)$(GREEN)Stoping Ubuntu container...$(RESET)"
 	@docker rm -f "$(IMAGE_NAME)-ubuntu"
 
-stop-docker-archlinux: ## Stop the the running containers
+stop-docker-archlinux: check-all ## Stop the the running containers
 	@echo "$(BOLD)$(GREEN)Stoping Archlinux container...$(RESET)"
 	@docker rm -f "$(IMAGE_NAME)-archlinux"
+
+terminal-docker-ubuntu: check-all ## Standard: Run the docker image with given arguments
+	@echo "$(BOLD)$(GREEN)Getting TTY in container...$(RESET)"
+	@docker exec -it "$(IMAGE_NAME)-ubuntu" /bin/bash
+
+terminal-docker-archlinux: check-all ## Standard: Run the docker image with given arguments
+	@echo "$(BOLD)$(GREEN)Getting TTY in container...$(RESET)"
+	@docker exec -it "$(IMAGE_NAME)-archlinux" /bin/bash
 
 push-docker: check-all ## Standard: Push docker images on GitHub
 	@echo "$(YELLOW)TAG_ID = $(TAG_ID)$(RESET)"
